@@ -36,7 +36,7 @@ bool lista_insertar(lista_t *lista, void *dato, size_t posicion);
  *
  * Si la posición está mas allá del final de la lista, no se puede eliminar y devuelve NULL.
  */
-void *lista_eliminar(lista_t *lista, void *dato, size_t posicion);
+void *lista_eliminar(lista_t *lista, size_t posicion);
 
 /*
  * Reemplaza un dato en la posición dada de la lista y lo devuelve.
