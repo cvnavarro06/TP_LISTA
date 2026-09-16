@@ -13,6 +13,11 @@ struct lista
     size_t cantidad;
 };
 
+struct lista_iterador
+{
+    struct nodo *actual;
+};
+
 struct nodo *nuevo_nodo_lista(void *dato)
 {
     struct nodo *nodo_nuevo = malloc(sizeof(struct nodo));
@@ -35,7 +40,6 @@ lista_t *lista_crear()
     lista_t *nueva_lista = { NULL };
 
     nueva_lista = malloc(sizeof(struct lista));
-    nueva_lista->cabeza->data = 0;
     nueva_lista->cantidad = 0;
     nueva_lista->cabeza->siguiente = NULL;
 
@@ -159,12 +163,74 @@ void *lista_eliminar(lista_t *lista, size_t posicion)
 /*
  * Reemplaza un dato en la posición dada de la lista y lo devuelve.
  */
-void *lista_reemplazar(lista_t *lista, void *dato, size_t posicion);
+void *lista_reemplazar(lista_t *lista, void *dato, size_t posicion)
+{
+    if (lista == NULL || lista_esta_vacia(lista)) {
+        return NULL;
+    } else if (posicion > lista->cantidad) {
+        return NULL;
+    }
+
+    int i = 0;
+
+    struct nodo *actual = lista->cabeza;
+
+    void *data_replaced = { NULL };
+
+    bool encontrado = false;
+
+    while (actual != NULL || !encontrado) {
+
+        if (posicion == i) {
+            data_replaced = actual->data;
+            actual->data = dato;
+
+            encontrado = true;
+        } else {
+            i++;
+            actual = actual->siguiente;
+        }
+
+    }
+
+    return data_replaced;
+}
 
 /*
  * Devuelve el elemento que se encuentra en la posición de la lista.
  */
-void *lista_obtener(lista_t *lista, size_t posicion);
+void *lista_obtener(lista_t *lista, size_t posicion)
+{
+    if (lista == NULL || lista_esta_vacia(lista)) {
+        return NULL;
+    } else if (posicion > lista->cantidad) {
+        return NULL;
+    }
+
+    int i = 0;
+
+    struct nodo *actual = lista->cabeza;
+
+    void *data = { NULL };
+
+    bool encontrado = false;
+
+    while (actual != NULL && !encontrado) {
+
+        if (posicion == i) {
+            data = actual->data;
+
+            encontrado = true;
+        } else {
+            actual = actual->siguiente;
+            i++;
+        }
+
+    }
+
+
+    return data;
+}
 
 /*
  * Busca un elemento en la lista utilizando el comparador. Si lo encuentra devuelve la posición en la que se encuentra.
@@ -188,18 +254,22 @@ size_t lista_iterar(lista_t *lista, bool (*f)(void *, void *), void *extra);
  */
 void lista_destruir(lista_t *lista)
 {
-    if (lista == NULL) {
+    if (lista == NULL){
         return;
-    }
-
+    } 
+    
     if (lista->cabeza == NULL) {
         free(lista);
         return;
     }
 
-    free(lista->cabeza->siguiente);
+    struct nodo *aux = lista->cabeza;
+
+    lista->cabeza = lista->cabeza->siguiente;
+
+    free(aux);
     
-    lista_destruir(lista->cabeza->siguiente);
+    lista_destruir(lista);
 }
 
 /*
@@ -207,29 +277,102 @@ void lista_destruir(lista_t *lista)
  *
  * Adicionalmente aplica la función destructora a cada elemento almacenado *
  */
-void lista_destruir_todo(lista_t *lista, void (*destructor)(void *));
+void lista_destruir_todo(lista_t *lista, void (*destructor)(void *))
+{
+    if (lista == NULL || destructor == NULL){
+        return;
+    } 
+    
+    if (lista->cabeza == NULL) {
+        free(lista);
+        return;
+    }
+
+    struct nodo *aux = lista->cabeza;
+
+    lista->cabeza = lista->cabeza->siguiente;
+
+    destructor(aux->data);
+    
+    free(aux);
+    
+    lista_destruir_todo(lista, destructor);
+
+
+}
 
 /*
  * Crea un iterador de lista
  */
-lista_iterador_t *lista_iterador_crear(lista_t *lista);
+lista_iterador_t *lista_iterador_crear(lista_t *lista)
+{
+    if (lista == NULL || lista_esta_vacia(lista)) {
+        return NULL;
+    }
+
+    struct lista_iterador *nuevo_iterador = malloc(sizeof(struct lista_iterador));
+
+    if (nuevo_iterador == NULL) {
+        return NULL;
+    }
+
+    nuevo_iterador->actual = lista->cabeza;
+
+    return nuevo_iterador;
+
+}
 
 /*
  * Devuelve true si hay mas elementos para iterar
  */
-bool lista_iterador_se_puede_iterar(lista_iterador_t *it);
+bool lista_iterador_se_puede_iterar(lista_iterador_t *it)
+{
+    bool exito = false;
+
+    if (it == NULL || it->actual == NULL) {
+        return exito;
+    } else {
+        exito = true;
+    }
+
+    return exito;
+}
 
 /*
  * Avanza a la siguiente iteración
  */
-void lista_iterador_siguiente(lista_iterador_t *it);
+void lista_iterador_siguiente(lista_iterador_t *it)
+{
+    if (it == NULL){
+        return;
+    }
+
+    return it->actual->siguiente;
+}
 
 /*
  * Devuelve el elemento actual iterado
  */
-void *lista_iterador_obtener_elemento(lista_iterador_t *it);
+void *lista_iterador_obtener_elemento(lista_iterador_t *it)
+{
+    if (it == NULL) {
+        return NULL;
+    }
+
+    return it->actual->data;
+}
 
 /*
  * Destruye el iterador
  */
-void lista_iterador_destruir(lista_iterador_t *it);
+void lista_iterador_destruir(lista_iterador_t *it)
+{
+    if (it == NULL) {
+        return;
+    }
+
+    lista_destruir(it->actual);
+
+    free(it);
+
+}
