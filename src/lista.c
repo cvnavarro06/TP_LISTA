@@ -38,8 +38,13 @@ lista_t *lista_crear()
 	lista_t *nueva_lista = { NULL };
 
 	nueva_lista = malloc(sizeof(struct lista));
+
+    if (nueva_lista == NULL) {
+        return NULL;
+    }
+
 	nueva_lista->cantidad = 0;
-	nueva_lista->cabeza->siguiente = NULL;
+	nueva_lista->cabeza = NULL;
 
 	return nueva_lista;
 }
@@ -79,7 +84,7 @@ bool lista_insertar(lista_t *lista, void *dato, size_t posicion)
 {
 	bool exito = false;
 
-	if (lista == NULL || posicion < 0) {
+	if (lista == NULL) {
 		return exito;
 	} else if (posicion > lista->cantidad) {
 		return exito;
@@ -93,16 +98,16 @@ bool lista_insertar(lista_t *lista, void *dato, size_t posicion)
 
 	//
 	while (actual != NULL && !exito) {
-		struct nodo *aux = actual;
 
 		if (lista_esta_vacia(lista)) {
 			lista->cabeza = nodo_nuevo;
-			exito = true;
+			
+            exito = true;
 		} else if (posicion - 1 == i) {
 			nodo_nuevo = actual->siguiente;
 			actual->siguiente = nodo_nuevo;
+            
 			exito = true;
-
 		} else {
 			actual = actual->siguiente;
 			i++;
@@ -231,39 +236,37 @@ void *lista_obtener(lista_t *lista, size_t posicion)
 int lista_buscar(lista_t *lista, void *buscado,
 		 int (*comparador)(void *, void *), void **encontrado)
 {
-    if (lista == NULL || comparador == NULL || buscado == NULL) {
-        return ERROR;
-    }
+	if (lista == NULL || comparador == NULL || buscado == NULL) {
+		return ERROR;
+	}
 
-    int i = 0;
+	int i = 0;
 
-    int posicion;
+	int posicion;
 
-    bool se_encontro = false;
+	bool se_encontro = false;
 
-    struct nodo *actual = lista->cabeza;
+	struct nodo *actual = lista->cabeza;
 
-    while (actual != NULL && !se_encontro) {
+	while (actual != NULL && !se_encontro) {
+		if (comparador(buscado, actual->data) == 0) {
+			*encontrado = actual->data;
+			posicion = i;
 
-        if (comparador(buscado, actual->data) == 0) {
-            *encontrado = actual->data;
-            posicion = i;
+			se_encontro = true;
+		} else {
+			i++;
+			actual = actual->siguiente;
+		}
+	}
 
-            se_encontro = true;
-        } else {
-            i++;
-            actual = actual->siguiente;
-        }
-    }
+	if (!se_encontro) {
+		*encontrado = NULL;
 
-    if (!se_encontro) {
-        *encontrado = NULL;
+		posicion = ERROR;
+	}
 
-        posicion = ERROR;
-    }
-
-
-    return posicion;
+	return posicion;
 }
 
 /*
@@ -273,26 +276,26 @@ int lista_buscar(lista_t *lista, void *buscado,
  */
 size_t lista_iterar(lista_t *lista, bool (*f)(void *, void *), void *extra)
 {
-    if (lista == NULL || f == NULL || extra == NULL) {
-        return NULL;
-    }
 
-    size_t contador = 0;
-    
-    struct nodo *actual = lista->cabeza;
+	size_t contador = 0;
 
-    bool stop = false;
+	if (lista == NULL || f == NULL || extra == NULL) {
+		return contador;
+	}
 
-    while (actual != NULL && !stop) {
+	struct nodo *actual = lista->cabeza;
 
-        contador++;
+	bool stop = false;
 
-        if (!f(actual->data, extra)) {
-            stop = true;
-        }
-    }
+	while (actual != NULL && !stop) {
+		contador++;
 
-    return contador;
+		if (!f(actual->data, extra)) {
+			stop = true;
+		}
+	}
+
+	return contador;
 }
 
 /*
@@ -315,7 +318,7 @@ void lista_destruir(lista_t *lista)
 
 	free(aux);
 
-    //Recursivo
+	//Recursivo
 	lista_destruir(lista);
 }
 
@@ -392,7 +395,8 @@ void lista_iterador_siguiente(lista_iterador_t *it)
 		return;
 	}
 
-	return it->actual->siguiente;
+    it->actual = it->actual->siguiente;
+
 }
 
 /*
@@ -415,8 +419,18 @@ void lista_iterador_destruir(lista_iterador_t *it)
 	if (it == NULL) {
 		return;
 	}
+    
+    struct nodo *aux = it->actual;
 
-	lista_destruir(it->actual);
+    while (aux != NULL) {
 
+        it->actual = it->actual->siguiente;
+
+        free(aux);
+
+        aux = it->actual;
+
+    }
+    
 	free(it);
 }
