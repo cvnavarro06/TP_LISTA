@@ -1,13 +1,17 @@
 #include "lista.h"
 
+#include <stdio.h>
+
 #define ERROR -1
 
-struct nodo {
+struct nodo 
+{
 	void *data;
 	struct nodo *siguiente;
 };
 
-struct lista {
+struct lista 
+{
 	struct nodo *cabeza;
 	size_t cantidad;
 };
@@ -86,8 +90,6 @@ bool lista_insertar(lista_t *lista, void *dato, size_t posicion)
 
 	if (lista == NULL) {
 		return exito;
-	} else if (posicion > lista->cantidad) {
-		return exito;
 	}
 
 	size_t i = 0;
@@ -96,23 +98,30 @@ bool lista_insertar(lista_t *lista, void *dato, size_t posicion)
 
 	struct nodo *nodo_nuevo = nuevo_nodo_lista(dato);
 
-	//
-	while (actual != NULL && !exito) {
+    if (lista_esta_vacia(lista)) {
+		lista->cabeza = nodo_nuevo;
+		
+        exito = true;
+	} else {
 
-		if (lista_esta_vacia(lista)) {
-			lista->cabeza = nodo_nuevo;
-			
-            exito = true;
-		} else if (posicion - 1 == i) {
-			nodo_nuevo = actual->siguiente;
-			actual->siguiente = nodo_nuevo;
-            
-			exito = true;
-		} else {
-			actual = actual->siguiente;
-			i++;
-		}
-	}
+        while (actual != NULL && !exito) {
+
+            if (posicion == 0) { //Caso límite.
+                nodo_nuevo->siguiente = lista->cabeza;
+                lista->cabeza = nodo_nuevo;
+                
+                exito = true;
+            } else if (posicion - 1 == i) {
+		    	nodo_nuevo->siguiente = actual->siguiente;
+		    	actual->siguiente = nodo_nuevo;
+
+		    	exito = true;
+		    } else {
+		    	actual = actual->siguiente;
+		    	i++;
+		    }
+	    }
+    }
 
 	if (exito) {
 		lista->cantidad++;
@@ -143,18 +152,32 @@ void *lista_eliminar(lista_t *lista, size_t posicion)
 	struct nodo *aux;
 
 	while (actual != NULL && !encontrado) {
-		if (posicion - 1 == i) {
+		
+        if (posicion == 0) {
+            lista->cabeza = actual->siguiente;
+            aux = actual;
+            data = aux->data;
+
+            free(aux);
+
+            encontrado = true;
+        } else if (posicion - 1 == i) {
 			aux = actual->siguiente;
 			actual->siguiente = actual->siguiente->siguiente;
 			data = aux->data;
 
 			free(aux);
+
 			encontrado = true;
 		} else {
 			actual = actual->siguiente;
 			i++;
 		}
 	}
+
+    if (encontrado) {
+        lista->cantidad--;
+    }
 
 	return data;
 }
@@ -431,6 +454,6 @@ void lista_iterador_destruir(lista_iterador_t *it)
         aux = it->actual;
 
     }
-    
+
 	free(it);
 }
