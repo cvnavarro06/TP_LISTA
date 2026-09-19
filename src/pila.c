@@ -1,139 +1,99 @@
 #include "pila.h"
+#include "lista.h"
+#include <stdlib.h>
 
-struct nodo
-{
-    void *data;
-    struct nodo *siguiente;
+struct pila {
+	lista_t *lista;
+
 };
-
-struct pila 
-{
-    struct nodo *tope;
-    size_t cantidad;
-};
-
-struct nodo *nuevo_nodo_pila(void *dato)
-{
-    struct nodo *nodo_nuevo = malloc(sizeof(struct nodo));
-
-    if (nodo_nuevo == NULL) {
-        return NULL;
-    } else {
-        nodo_nuevo->data = dato;
-        nodo_nuevo->siguiente = NULL;
-    }
-
-    return nodo_nuevo;  
-}
 
 pila_t *pila_crear()
 {
+	pila_t *nueva_pila = malloc(sizeof(pila_t));
+	if (nueva_pila == NULL) {
+		return NULL;
+	}
 
-    pila_t *pila_nueva = malloc(sizeof(pila_t));
+	nueva_pila->lista = lista_crear();
+	if (nueva_pila->lista == NULL) {
+		free(nueva_pila);
+		return NULL;
+	}
 
-    if (pila_nueva == NULL) {
-        return NULL;
-    } else {
-        pila_nueva->tope = NULL;
-        pila_nueva->cantidad = 0;
-    }
-
-    return pila_nueva;
+	return nueva_pila;
 }
 
 bool pila_apilar(pila_t *p, void *e)
 {
-    bool exito = false;
+	bool exito = false;
 
-    if (p == NULL) {
-        return exito;
-    }
+	if (p == NULL) {
+		return exito;
+	}
 
-    struct nodo *nodo_nuevo = nuevo_nodo_pila(e);
+	if (lista_insertar(p->lista, e, 0)) {
+		exito = true;
+	}
 
-    if (nodo_nuevo != NULL) {
-        
-        if (pila_esta_vacia(p)) {
-            p->tope = nodo_nuevo;
-            p->tope->siguiente = NULL;
-        } else {
-            nodo_nuevo->siguiente = p->tope;
-            p->tope = nodo_nuevo;
-        }
-        p->cantidad++;
-        exito = true;
-    }
-
-    return exito;
+	return exito;
 }
 
 void *pila_desapilar(pila_t *p)
 {
-    if (p == NULL || (p->tope == NULL) || pila_esta_vacia(p)) {
-        return NULL;
-    }
+	if (p == NULL || pila_esta_vacia(p)) {
+		return NULL;
+	}
 
-    struct nodo *nodo_a_sacar = p->tope;
+	void *data = lista_eliminar(p->lista, 0);
 
-    void *data = nodo_a_sacar->data;
-
-    p->tope = p->tope->siguiente;
-
-    free(nodo_a_sacar);
-
-    p->cantidad--;
-    
-    return data;
+	return data;
 }
 
 void *pila_tope(pila_t *p)
 {
-    if (p == NULL || pila_esta_vacia(p)) {
-        return NULL;
-    }
+	if (p == NULL || pila_esta_vacia(p)) {
+		return NULL;
+	}
 
-    void *data = p->tope->data;
+	void *data = lista_obtener(p->lista, 0);
 
-    return data;
+	return data;
 }
 
 bool pila_esta_vacia(pila_t *p)
 {
-    bool vacia = false;
+	bool vacia = false;
 
-    if (p == NULL) {
-        return vacia;
-    }
+	if (p == NULL) {
+		return !vacia;
+	}
 
-    if (p->cantidad <= 0) {
-        vacia = true;
-    }
+	if (lista_esta_vacia(p->lista)) {
+		vacia = true;
+	}
 
-    return vacia;
+	return vacia;
 }
 
 size_t pila_cantidad(pila_t *p)
 {
-    if (p == NULL) {
-        return 0;
-    }
+	size_t cantidad = 0;
 
-    return p->cantidad;
+	if (p == NULL) {
+		return cantidad;
+	}
+
+	cantidad = lista_cantidad(p->lista);
+	
+	return cantidad;
 }
 
 void pila_destruir(pila_t *pila)
 {
-    if (pila == NULL) {
-        return;
-    }
+	if (pila == NULL) {
+		return;
+	}
 
-    while(pila->tope != NULL) {
-        struct nodo *aux = pila->tope->siguiente;
-
-        free(pila->tope);
-
-        pila->tope = aux;
-    }
-
-    free (pila);
+	lista_destruir(pila->lista);
+	free(pila);
 }

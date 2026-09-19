@@ -1,147 +1,102 @@
 #include "cola.h"
-#include <stdio.h>
+#include "lista.h"
+#include <stdlib.h>
 
-
-struct nodo
-{
-    void *data;
-    struct nodo *siguiente;
+struct cola {
+	lista_t *lista;
 };
-
-struct cola
-{
-    struct nodo *principio;
-    struct nodo *final;
-    size_t cantidad;
-};
-
-struct nodo *nuevo_nodo_cola(void *dato)
-{
-    struct nodo *nodo_nuevo = malloc(sizeof(struct nodo));
-
-    if (nodo_nuevo == NULL) {
-        return NULL;
-    } else {
-        nodo_nuevo->data = dato;
-        nodo_nuevo->siguiente = NULL;
-    }
-
-    return nodo_nuevo;  
-}
-
 
 cola_t *cola_crear()
 {
-    cola_t *nueva_cola = malloc(sizeof(cola_t));
+	cola_t *nueva_cola = malloc(sizeof(cola_t));
+	
+	if (nueva_cola == NULL) {
+		return NULL;
+	}
 
-    if (nueva_cola == NULL) {
-        return NULL;
-    } else {
-        nueva_cola->principio = NULL;
-        nueva_cola->final = NULL;
+	nueva_cola->lista = lista_crear();
 
-        nueva_cola->cantidad = 0;
-    }
+	if (nueva_cola->lista == NULL) {
+		free(nueva_cola);
+		return NULL;
+	}
 
-    return nueva_cola;
+	return nueva_cola;
 }
 
 bool cola_encolar(cola_t *c, void *e)
 {
-    bool exito = false;
+	bool exito = false;
 
-    if (c == NULL) {
-        return exito;
-    }
+	if (c == NULL) {
+		return exito;
+	}
 
-    //Creo un nuevo nodo aislado
-    struct nodo *nodo_nuevo = nuevo_nodo_cola(e);
+	size_t posicion_final = lista_cantidad(c->lista);
 
-    if (nodo_nuevo != NULL) {
-        
-        if (cola_esta_vacia(c)) {
-            c->principio = nodo_nuevo;
-            c->final = nodo_nuevo;
-        } else {
-            c->final->siguiente = nodo_nuevo;
-            
-            c->final = nodo_nuevo;
+	if (lista_insertar(c->lista, e, posicion_final)) {
+		exito = true;
+	}
 
-            c->final->siguiente = NULL;
-        }
-        c->cantidad++;
-        exito = true;
-    }
-    
-    return exito;
+	return exito;
 }
 
 void *cola_desencolar(cola_t *c)
 {
-    if (c == NULL || cola_esta_vacia(c)) {
-        return NULL;
-    }
+	if (c == NULL || cola_esta_vacia(c)) {
+		return NULL;
+	}
 
+	void *data = lista_eliminar(c->lista, 0);
 
-    //Linkeo el auxiliar con el nodo a desencolar
-    struct nodo *nodo_a_sacar = c->principio;
-
-    void *data = nodo_a_sacar->data;
-    
-    //Le paso el linkeo del principio al siguiente
-    c->principio = c->principio->siguiente;
-    
-    if (c->principio == NULL) c->final = NULL;
-    free(nodo_a_sacar);
-    
-    c->cantidad--;
-
-    return data;
+	return data;
 }
 
 void *cola_frente(cola_t *c)
 {
-    if (c == NULL || cola_esta_vacia(c)) {
-        return NULL;
-    }
+	if (c == NULL || cola_esta_vacia(c)) {
+		return NULL;
+	}
 
-    return c->final->data;
+	void *data = lista_obtener(c->lista, 0);
+
+	return data;
 }
 
 bool cola_esta_vacia(cola_t *c)
 {
-    bool vacio = false;
+	bool vacia = false;
 
-    if (c->cantidad <= 0) {
-        vacio = true;
-    }
+	if (c == NULL) {
+		return !vacia;
+	}
 
-    return vacio;
+	if (lista_esta_vacia(c->lista)) {
+		vacia = true;
+	}
+
+	return vacia;
 }
 
 size_t cola_cantidad(cola_t *c)
 {
-    if (c == NULL) {
-        return 0;
-    }
+	size_t cantidad = 0;
 
-    return c->cantidad;
+	if (c == NULL) {
+		return cantidad;
+	}
+
+	cantidad = lista_cantidad(c->lista);
+
+	return cantidad;
 }
 
 void cola_destruir(cola_t *cola)
 {
-    if (cola == NULL) {
-        return;
-    }
+	if (cola == NULL) {
+		return;
+	}
 
-    while (cola->principio != NULL) {
-        struct nodo *aux = cola->principio->siguiente;
-
-        free(cola->principio);
-
-        cola->principio = aux;
-    }
-
-    free(cola);
-
+	lista_destruir(cola->lista);
+	free(cola);
 }
