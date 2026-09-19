@@ -20,7 +20,7 @@ struct lista_iterador {
 	struct nodo *actual;
 };
 
-struct nodo *nuevo_nodo_lista(void *dato)
+struct nodo *crear_nodo(void *dato)
 {
 	struct nodo *nodo_nuevo = malloc(sizeof(struct nodo));
 
@@ -39,9 +39,8 @@ struct nodo *nuevo_nodo_lista(void *dato)
  */
 lista_t *lista_crear()
 {
-	lista_t *nueva_lista = { NULL };
 
-	nueva_lista = malloc(sizeof(struct lista));
+	lista_t *nueva_lista = malloc(sizeof(struct lista));
 
     if (nueva_lista == NULL) {
         return NULL;
@@ -58,7 +57,15 @@ lista_t *lista_crear()
  */
 size_t lista_cantidad(lista_t *lista)
 {
-	return lista->cantidad;
+	size_t cantidad = 0;
+
+	if (lista == NULL) {
+		return cantidad;
+	}
+
+	cantidad = lista->cantidad;
+
+	return cantidad;
 }
 
 /*
@@ -66,15 +73,19 @@ size_t lista_cantidad(lista_t *lista)
  */
 bool lista_esta_vacia(lista_t *lista)
 {
-	size_t cantidad = lista->cantidad;
-
-	bool vacio = false;
-
-	if (cantidad <= 0) {
-		vacio = true;
+	bool vacia = false;
+	
+	if (lista == NULL) {
+		return vacia;	
 	}
 
-	return vacio;
+	size_t cantidad = lista->cantidad;
+
+	if (cantidad <= 0) {
+		vacia = true;
+	}
+
+	return vacia;
 }
 
 /*
@@ -88,40 +99,35 @@ bool lista_insertar(lista_t *lista, void *dato, size_t posicion)
 {
 	bool exito = false;
 
-	if (lista == NULL) {
+	if (lista == NULL || posicion > lista->cantidad) {
 		return exito;
 	}
 
 	size_t i = 0;
 
+	struct nodo *nodo_nuevo = crear_nodo(dato);
+
 	struct nodo *actual = lista->cabeza;
 
-	struct nodo *nodo_nuevo = nuevo_nodo_lista(dato);
-
-    if (lista_esta_vacia(lista)) {
+	if (posicion == 0) { // Caso límite
+		nodo_nuevo->siguiente = lista->cabeza;
 		lista->cabeza = nodo_nuevo;
-		
-        exito = true;
-	} else {
 
-        while (actual != NULL && !exito) {
+		exito = true;
+	}
 
-            if (posicion == 0) { //Caso límite.
-                nodo_nuevo->siguiente = lista->cabeza;
-                lista->cabeza = nodo_nuevo;
-                
-                exito = true;
-            } else if (posicion - 1 == i) {
-		    	nodo_nuevo->siguiente = actual->siguiente;
-		    	actual->siguiente = nodo_nuevo;
+    while (actual != NULL && !exito) {
 
-		    	exito = true;
-		    } else {
-		    	actual = actual->siguiente;
-		    	i++;
-		    }
+        if (posicion - 1 == i) {
+	    	nodo_nuevo->siguiente = actual->siguiente;
+	    	actual->siguiente = nodo_nuevo;
+
+	    	exito = true;
+	    } else {
+	    	actual = actual->siguiente;
+	    	i++;
 	    }
-    }
+	}
 
 	if (exito) {
 		lista->cantidad++;
@@ -442,18 +448,6 @@ void lista_iterador_destruir(lista_iterador_t *it)
 	if (it == NULL) {
 		return;
 	}
-    
-    struct nodo *aux = it->actual;
-
-    while (aux != NULL) {
-
-        it->actual = it->actual->siguiente;
-
-        free(aux);
-
-        aux = it->actual;
-
-    }
 
 	free(it);
 }
