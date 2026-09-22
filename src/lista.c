@@ -88,6 +88,41 @@ bool lista_esta_vacia(lista_t *lista)
 	return vacia;
 }
 
+
+bool insertar_en_lista(lista_t *lista, struct nodo *actual, size_t posicion, struct nodo *nodo_nuevo)
+{
+	bool exito = false;
+	
+	if (lista == NULL) {
+		return exito;
+	}
+
+	size_t i = 0;
+
+	if (posicion == 0) { // Caso límite
+		nodo_nuevo->siguiente = lista->cabeza;
+		lista->cabeza = nodo_nuevo;
+
+		exito = true;
+	}
+
+	while (actual != NULL && !exito) {
+       
+		if (posicion - 1 == i) {
+	   		nodo_nuevo->siguiente = actual->siguiente;
+	   		actual->siguiente = nodo_nuevo;
+
+	   		exito = true;
+		} else {
+
+	   	actual = actual->siguiente;
+	   	i++;
+	   	}
+	}
+
+	return exito;
+}
+
 /*
  * Inserta un dato en la posicion dada de la lista y devuelve true si pudo.
  *
@@ -103,31 +138,11 @@ bool lista_insertar(lista_t *lista, void *dato, size_t posicion)
 		return exito;
 	}
 
-	size_t i = 0;
-
 	struct nodo *nodo_nuevo = crear_nodo(dato);
 
 	struct nodo *actual = lista->cabeza;
 
-	if (posicion == 0) { // Caso límite
-		nodo_nuevo->siguiente = lista->cabeza;
-		lista->cabeza = nodo_nuevo;
-
-		exito = true;
-	}
-
-    while (actual != NULL && !exito) {
-
-        if (posicion - 1 == i) {
-	    	nodo_nuevo->siguiente = actual->siguiente;
-	    	actual->siguiente = nodo_nuevo;
-
-	    	exito = true;
-	    } else {
-	    	actual = actual->siguiente;
-	    	i++;
-	    }
-	}
+	exito = insertar_en_lista(lista, actual, posicion, nodo_nuevo);
 
 	if (exito) {
 		lista->cantidad++;
@@ -136,38 +151,32 @@ bool lista_insertar(lista_t *lista, void *dato, size_t posicion)
 	return exito;
 }
 
-/*
- * Elimina un dato en la posicion dada de la lista y devuelve el elemento eliminado.
- *
- * Si la posición está mas allá del final de la lista, no se puede eliminar y devuelve NULL.
- */
-void *lista_eliminar(lista_t *lista, size_t posicion)
+void *eliminar_en_lista(lista_t *lista, struct nodo *actual, size_t posicion)
 {
-	if (lista == NULL || lista_esta_vacia(lista)) {
+	if (actual == NULL) {
 		return NULL;
 	}
 
-	int i = 0;
+	size_t i = 0;
 
 	bool encontrado = false;
 
+	struct nodo *aux;
+
 	void *data = { NULL };
 
-	struct nodo *actual = lista->cabeza;
+	if (posicion == 0) {
+        lista->cabeza = actual->siguiente;
+        aux = actual;
+        data = aux->data;
+        free(aux);
 
-	struct nodo *aux;
+        encontrado = true;
+    }
 
 	while (actual != NULL && !encontrado) {
 		
-        if (posicion == 0) {
-            lista->cabeza = actual->siguiente;
-            aux = actual;
-            data = aux->data;
-
-            free(aux);
-
-            encontrado = true;
-        } else if (posicion - 1 == i) {
+        if (posicion - 1 == i) {
 			aux = actual->siguiente;
 			actual->siguiente = actual->siguiente->siguiente;
 			data = aux->data;
@@ -181,6 +190,33 @@ void *lista_eliminar(lista_t *lista, size_t posicion)
 		}
 	}
 
+	return data;
+
+}
+
+/*
+ * Elimina un dato en la posicion dada de la lista y devuelve el elemento eliminado.
+ *
+ * Si la posición está mas allá del final de la lista, no se puede eliminar y devuelve NULL.
+ */
+void *lista_eliminar(lista_t *lista, size_t posicion)
+{
+	if (lista == NULL || lista_esta_vacia(lista)) {
+		return NULL;
+	}
+
+	bool encontrado = false;
+
+	void *data = { NULL };
+
+	struct nodo *actual = lista->cabeza;
+
+	data = eliminar_en_lista(lista, actual, posicion);
+
+	if (data != NULL) {
+		encontrado = true;
+	}
+
     if (encontrado) {
         lista->cantidad--;
     }
@@ -188,24 +224,19 @@ void *lista_eliminar(lista_t *lista, size_t posicion)
 	return data;
 }
 
-/*
- * Reemplaza un dato en la posición dada de la lista y lo devuelve.
- */
-void *lista_reemplazar(lista_t *lista, void *dato, size_t posicion)
+
+void *remplazar_en_lista(struct nodo *actual, size_t posicion, void *dato)
 {
-	if (lista == NULL || lista_esta_vacia(lista)) {
-		return NULL;
-	} else if (posicion > lista->cantidad) {
+
+	if (actual == NULL) {
 		return NULL;
 	}
-
-	int i = 0;
-
-	struct nodo *actual = lista->cabeza;
-
+	
 	void *data_replaced = { NULL };
 
 	bool encontrado = false;
+
+	size_t i = 0;
 
 	while (actual != NULL && !encontrado) {
 		if (posicion == i) {
@@ -223,9 +254,9 @@ void *lista_reemplazar(lista_t *lista, void *dato, size_t posicion)
 }
 
 /*
- * Devuelve el elemento que se encuentra en la posición de la lista.
+ * Reemplaza un dato en la posición dada de la lista y lo devuelve.
  */
-void *lista_obtener(lista_t *lista, size_t posicion)
+void *lista_reemplazar(lista_t *lista, void *dato, size_t posicion)
 {
 	if (lista == NULL || lista_esta_vacia(lista)) {
 		return NULL;
@@ -233,11 +264,22 @@ void *lista_obtener(lista_t *lista, size_t posicion)
 		return NULL;
 	}
 
-	int i = 0;
-
 	struct nodo *actual = lista->cabeza;
 
+	void *data_replaced = remplazar_en_lista(actual, posicion, dato);
+
+	return data_replaced;
+}
+
+void *obtener_en_lista(struct nodo *actual, size_t posicion)
+{
+	if (actual == NULL) {
+		return NULL;
+	}
+
 	void *data = { NULL };
+	
+	size_t i = 0;
 
 	bool encontrado = false;
 
@@ -256,6 +298,47 @@ void *lista_obtener(lista_t *lista, size_t posicion)
 }
 
 /*
+ * Devuelve el elemento que se encuentra en la posición de la lista.
+ */
+void *lista_obtener(lista_t *lista, size_t posicion)
+{
+	if (lista == NULL || lista_esta_vacia(lista)) {
+		return NULL;
+	} else if (posicion > lista->cantidad) {
+		return NULL;
+	}
+
+	struct nodo *actual = lista->cabeza;
+
+	void *data = obtener_en_lista(actual, posicion);
+
+	return data;
+}
+
+bool buscar_en_lista(struct nodo *actual, int *posicion, void *buscado, int(*comparador)(void*, void*),void **encontrado)
+{
+	if (actual == NULL);
+
+	bool se_encontro = false;
+
+	int i = 0;
+
+	while (actual != NULL && !se_encontro) {
+		if (comparador(buscado, actual->data) == 0) {
+			*encontrado = actual->data;
+			*posicion = i;
+
+			se_encontro = true;
+		} else {
+			i++;
+			actual = actual->siguiente;
+		}
+	}
+
+	return se_encontro;
+}
+
+/*
  * Busca un elemento en la lista utilizando el comparador. Si lo encuentra devuelve la posición en la que se encuentra.
  *
  * Si no lo encuentra devuelve -1.
@@ -269,25 +352,13 @@ int lista_buscar(lista_t *lista, void *buscado,
 		return ERROR;
 	}
 
-	int i = 0;
-
+	struct nodo *actual = lista->cabeza;
+	
 	int posicion;
-
+	
 	bool se_encontro = false;
 
-	struct nodo *actual = lista->cabeza;
-
-	while (actual != NULL && !se_encontro) {
-		if (comparador(buscado, actual->data) == 0) {
-			*encontrado = actual->data;
-			posicion = i;
-
-			se_encontro = true;
-		} else {
-			i++;
-			actual = actual->siguiente;
-		}
-	}
+	se_encontro = buscar_en_lista(actual, &posicion, buscado, comparador, encontrado);
 
 	if (!se_encontro) {
 		*encontrado = NULL;
