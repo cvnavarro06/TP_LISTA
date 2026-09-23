@@ -9,19 +9,19 @@
 #define ROJO_INTENSO "\x1b[0;91m"
 #define AMARRILO_INTENSO "\x1b[1;93m"
 
-#define RESETEO_DE_COLOR "\x1b[0m"
+#define RESETEO_DE_COLOR   "\x1b[0m"
+
 
 #define EXITO 0
 #define ERROR -1
 
 #define OPERADOR 1
+#define CONJUNTOS 2
 
 #define OPERADOR_SUMA '+'
 #define OPERADOR_RESTA '-'
 #define OPERADOR_DIVISION '/'
 #define OPERADOR_MULTIPLICACION '*'
-
-#define CONJUNTOS 2
 
 #define CARACTER_NULO '\0'
 #define SEPARADOR ','
@@ -38,8 +38,9 @@ const char *FORMATO_ESCRITURA_CONJUNTO_VACIO = "E%c";
 */
 bool parsear_conjunto(cola_t *cola, char *conjunto, char separador)
 {
-	if (cola == NULL || conjunto == NULL || separador == CARACTER_NULO) {
-		return false;
+
+    if (cola == NULL || conjunto == NULL || separador == CARACTER_NULO){
+        return false;
 	}
 
 	if (*conjunto == CARACTER_NULO) {
@@ -56,7 +57,7 @@ bool parsear_conjunto(cola_t *cola, char *conjunto, char separador)
 
 	bool err = false;
 
-	while (*conjunto != separador && *conjunto != CARACTER_NULO && !err) {
+    while (*conjunto != separador && *conjunto != CARACTER_NULO && !err) {
 		numero[tope_numero] = conjunto[0];
 		tope_numero++;
 
@@ -71,7 +72,7 @@ bool parsear_conjunto(cola_t *cola, char *conjunto, char separador)
 			//Avanzo aritméticamente
 			conjunto++;
 		}
-	}
+    }
 
 	if (err) {
 		free(numero);
@@ -84,7 +85,7 @@ bool parsear_conjunto(cola_t *cola, char *conjunto, char separador)
 
 	free(numero);
 
-	if (!cola_encolar(cola, (void *)(intptr_t)numero_transformado)) {
+	if (!cola_encolar(cola, (void*)(intptr_t)numero_transformado)) {
 		return false;
 	}
 
@@ -101,19 +102,20 @@ bool parsear_conjunto(cola_t *cola, char *conjunto, char separador)
  *
  * Procede a hacer la operacion en base al operador.
 */
-void calculador_con_operador(int *numero, int numero_2, char operador, size_t j,
-			     bool *err_div)
+void calculador_con_operador(int *numero, int numero_2, char operador, size_t j, bool *err_div)
 {
 	if (j == 0) {
 		*numero = numero_2;
 	} else {
+
 		if (operador == OPERADOR_SUMA) {
-			*numero += numero_2;
+			*numero += numero_2; 
 		} else if (operador == OPERADOR_RESTA) {
 			*numero -= numero_2;
 		} else if (operador == OPERADOR_MULTIPLICACION) {
 			*numero *= numero_2;
 		} else if (operador == OPERADOR_DIVISION) {
+			
 			if (numero_2 == 0) {
 				*err_div = true;
 			} else {
@@ -140,7 +142,7 @@ size_t longitud_del_numero(int numero)
 	} else {
 		num = log10(numero) + 1;
 	}
-
+	
 	return (size_t)num;
 }
 
@@ -156,8 +158,6 @@ char *calculadora_de_conjuntos(lista_t *lista, int tope, char operador)
 		return NULL;
 	}
 
-	size_t cantidad_lista = lista_cantidad(lista);
-
 	//Multiplico por 3 para abarcar un espacio "Empty" + separador + caractér nulo
 	char *conjunto_final = malloc(sizeof(char) * 3);
 
@@ -169,51 +169,61 @@ char *calculadora_de_conjuntos(lista_t *lista, int tope, char operador)
 
 	bool err = false;
 
-	for (size_t i = 0; i < tope && !err; i++) {
+	for (size_t i = 0; i<tope && !err; i++) {
+		
 		int numero = 0;
 
 		bool err_div = false;
 
-		for (size_t j = 0; j < cantidad_lista; j++) {
-			int data = (int)(intptr_t)cola_desencolar(
-				(cola_t *)lista_obtener(lista, j));
+		size_t j = 0;
 
-			calculador_con_operador(&numero, data, operador, j,
-						&err_div);
+		//Utilizo el iterador de listas
+		lista_iterador_t *iterador = lista_iterador_crear(lista);
+
+		while(lista_iterador_se_puede_iterar(iterador) && !err_div) {
+
+			cola_t *cola_actual = (cola_t*)lista_iterador_obtener_elemento(iterador);
+
+			int data = (int)(intptr_t)cola_desencolar(cola_actual);
+		
+			calculador_con_operador(&numero, data, operador, j, &err_div);
+			
+			j++;
+
+			lista_iterador_siguiente(iterador);
 		}
+		
+		lista_iterador_destruir(iterador);
 
 		size_t tamanio_conjunto = strlen(conjunto_final);
 
-		if (!err_div) {
+		if (!err_div){
+
 			size_t size = longitud_del_numero(numero);
 
 			//Sumo +2 para el separador y el caractér nulo
-			char *aux = realloc(
-				conjunto_final,
-				sizeof(char) * (size + tamanio_conjunto + 2));
+			char *aux = realloc(conjunto_final, sizeof(char) * (size + tamanio_conjunto + 2));
 
 			if (aux == NULL) {
 				err = true;
 			} else {
 				conjunto_final = aux;
 
-				sprintf(conjunto_final + tamanio_conjunto,
-					FORMATO_ESCRITURA_CONJUNTO, numero,
-					SEPARADOR);
+				sprintf(conjunto_final + tamanio_conjunto, FORMATO_ESCRITURA_CONJUNTO, numero, SEPARADOR);
+
 			}
 		} else {
+			
 			//Sumo +3 para el E, el separator y el caractér nulo
-			char *aux =
-				realloc(conjunto_final, tamanio_conjunto + 3);
+			char *aux = realloc(conjunto_final, tamanio_conjunto + 3);
 
 			if (aux == NULL) {
 				err = true;
 			} else {
 				conjunto_final = aux;
-				sprintf(conjunto_final + tamanio_conjunto,
-					FORMATO_ESCRITURA_CONJUNTO_VACIO,
-					SEPARADOR);
+				sprintf(conjunto_final + tamanio_conjunto, FORMATO_ESCRITURA_CONJUNTO_VACIO, SEPARADOR);
 			}
+
 		}
 	}
 
@@ -223,6 +233,7 @@ char *calculadora_de_conjuntos(lista_t *lista, int tope, char operador)
 
 	return conjunto_final;
 }
+
 
 /*
  * Se espera un conjunto válido
@@ -236,7 +247,7 @@ char *rellenar_espacios_vacios(char *conjunto, int long_min, int long_max)
 	if (conjunto == NULL) {
 		return NULL;
 	}
-
+	
 	bool err = false;
 
 	size_t tamanio_conjunto_nuevo = strlen(conjunto);
@@ -244,22 +255,18 @@ char *rellenar_espacios_vacios(char *conjunto, int long_min, int long_max)
 	int espacios_vacios = long_max - long_min;
 
 	//Multiplico por 2 para inlcuir los separadores + 1 del caractér nulo.
-	char *aux = realloc(
-		conjunto, sizeof(char) * (tamanio_conjunto_nuevo +
-					  (((size_t)espacios_vacios * 2) + 1)));
+	char *aux = realloc(conjunto, sizeof(char) * (tamanio_conjunto_nuevo + (((size_t)espacios_vacios * 2) + 1)));
 
 	if (aux == NULL) {
 		free(conjunto);
-		err = true;
-		;
+		err = true;;
 
 	} else {
 		conjunto = aux;
-
-		for (int k = 0; k < espacios_vacios; k++) {
+		
+		for (int k = 0; k<espacios_vacios; k++) {
 			tamanio_conjunto_nuevo = strlen(conjunto);
-			sprintf(conjunto + tamanio_conjunto_nuevo,
-				FORMATO_ESCRITURA_CONJUNTO_VACIO, SEPARADOR);
+			sprintf(conjunto + tamanio_conjunto_nuevo, FORMATO_ESCRITURA_CONJUNTO_VACIO, SEPARADOR);
 		}
 	}
 
@@ -270,15 +277,17 @@ char *rellenar_espacios_vacios(char *conjunto, int long_min, int long_max)
 	return conjunto;
 }
 
+
 int main(int argc, char **argv)
 {
 	if (argc < 2) {
+
 		printf("=============================\n"
-		       "  Linea de comando esperada\n"
-		       "=============================\n" ROJO_INTENSO
-		       "    Ha ocurrido un error\n\n" RESETEO_DE_COLOR
-		       "- ./[ejecutable] [operador] (conjuntos) ...\n\n"
-		       "- Lista de operadores: [+, -, *, /]\n");
+			   "  Linea de comando esperada\n"
+			   "=============================\n"
+			   ROJO_INTENSO"    Ha ocurrido un error\n\n"RESETEO_DE_COLOR
+			   "- ./[ejecutable] [operador] (conjuntos) ...\n\n"
+			   "- Lista de operadores: [+, -, *, /]\n");
 
 		return ERROR;
 	}
@@ -287,41 +296,39 @@ int main(int argc, char **argv)
 
 	int longitud_max = -1;
 
-	//Proximamente a utilizar para una función de calculo
 	int longitud_min = 1000000000;
-
+	
 	bool err = false;
 
-	//For para cargar la lista de colas con los conjuntos
+	//for para cargar la lista de colas con los conjuntos
 	for (size_t i = CONJUNTOS; i < (size_t)argc && !err; i++) {
-		cola_t *cola = cola_crear();
 
+		cola_t *cola = cola_crear();
+		
 		if (!parsear_conjunto(cola, argv[i], SEPARADOR)) {
 			err = true;
 		} else {
+		
 			int longitud = (int)cola_cantidad(cola);
-
-			if (longitud > longitud_max)
-				longitud_max = longitud;
-
-			if (longitud < longitud_min)
-				longitud_min = longitud;
-
+			
+			if (longitud > longitud_max) longitud_max = longitud;
+			
+			if (longitud < longitud_min) longitud_min = longitud;
+			
 			lista_insertar(lista, cola, i - 2);
 		}
 	}
 
-	char *conjunto_nuevo =
-		calculadora_de_conjuntos(lista, longitud_min, *argv[OPERADOR]);
+	char *conjunto_nuevo = calculadora_de_conjuntos(lista, longitud_min, *argv[OPERADOR]);
 
 	if (conjunto_nuevo == NULL) {
 		err = true;
 	}
 
-	if (!err) {
+	if (!err){
+
 		if (longitud_max != longitud_min) {
-			conjunto_nuevo = rellenar_espacios_vacios(
-				conjunto_nuevo, longitud_min, longitud_max);
+			conjunto_nuevo = rellenar_espacios_vacios(conjunto_nuevo, longitud_min, longitud_max);
 
 			if (conjunto_nuevo == NULL) {
 				err = true;
@@ -330,7 +337,7 @@ int main(int argc, char **argv)
 	}
 
 	if (err) {
-		lista_destruir_todo(lista, (void (*)(void *))cola_destruir);
+		lista_destruir_todo(lista, (void (*)(void*))cola_destruir);
 		return ERROR;
 	}
 
@@ -338,11 +345,11 @@ int main(int argc, char **argv)
 
 	conjunto_nuevo[tamanio_conjunto - 1] = CARACTER_NULO;
 
-	printf(AMARRILO_INTENSO "%s\n" RESETEO_DE_COLOR, conjunto_nuevo);
+	printf(AMARRILO_INTENSO"%s\n"RESETEO_DE_COLOR, conjunto_nuevo);
 
 	free(conjunto_nuevo);
 
-	lista_destruir_todo(lista, (void (*)(void *))cola_destruir);
+	lista_destruir_todo(lista, (void (*)(void*))cola_destruir);
 
 	return EXITO;
 }
