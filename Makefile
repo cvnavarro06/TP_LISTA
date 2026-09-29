@@ -15,11 +15,11 @@ manual:
 	@echo "    2. Ejecución:"
 	@echo "    • ./$(NOMBRE) <operador> <conjunto> ...  -> Ejecuta el programa principal (requiere compilar antes)"
 	@echo "    • make test                             -> Ejecuta las pruebas unitarias\n"
-	@echo "   >Nota: Recuerda compilar siempre antes de ejecutar el progrma."
+	@echo "   > Nota: Recuerda compilar siempre antes de ejecutar el progrma."
 	@echo "=========================================================================="
 
 compile:
-	gcc $(GCC_FLAGS) main.c src/*.c -o $(NOMBRE)
+	gcc $(GCC_FLAGS) main.c src/*.c main.c -o $(NOMBRE)
 	@echo "\nSe ha creado un archivo .o llamado $(NOMBRE)\n\nSi quieres saber como ejercutarlo escribe el siguiente comando:"
 	@echo "make test\n"
 
