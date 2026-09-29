@@ -9,7 +9,7 @@ struct cola {
 cola_t *cola_crear()
 {
 	cola_t *nueva_cola = malloc(sizeof(cola_t));
-	
+
 	if (nueva_cola == NULL) {
 		return NULL;
 	}

@@ -4,7 +4,6 @@
 
 struct pila {
 	lista_t *lista;
-
 };
 
 pila_t *pila_crear()
@@ -84,7 +83,7 @@ size_t pila_cantidad(pila_t *p)
 	}
 
 	cantidad = lista_cantidad(p->lista);
-	
+
 	return cantidad;
 }
 
