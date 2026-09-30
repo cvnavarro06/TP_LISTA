@@ -19,9 +19,10 @@ manual:
 	@echo "=========================================================================="
 
 compile:
-	gcc $(GCC_FLAGS) main.c src/*.c main.c -o $(NOMBRE)
-	@echo "\nSe ha creado un archivo .o llamado $(NOMBRE)\n\nSi quieres saber como ejercutarlo escribe el siguiente comando:"
-	@echo "make test\n"
+	gcc $(GCC_FLAGS) main.c src/*.c -o $(NOMBRE)
+	@echo "\nSe ha creado un archivo .o llamado $(NOMBRE)\n\nSi quieres saber como ejercutarlo escribe el siguiente comando:\n"
+
+	@echo "make exp\n"
 
 compile_test:
 	gcc ${GCC_FLAGS} pruebas/*.c src/*.c -o ${NOMBRE_TEST}
@@ -30,3 +31,16 @@ compile_test:
 test:
 	./${NOMBRE_TEST}
 	
+exp:
+	@echo "==============================================================="
+	@echo "                  FUNCIÓN DEL PROGRAMA"
+	@echo "===============================================================\n"
+	@echo " Explicación: El programa consiste en una calculadora de conjuntos."
+	@echo "		     Dichos conjuntos son determinados por el usuario, y"
+	@echo "		     los mismos pueden ser de [1;+inf].\n"
+	@echo " Operadores: - Suma ('+')"
+	@echo "		    - Resta ('-')"
+	@echo "		    - Multiplicación ('*')"
+	@echo "		    - División ('/')\n"
+	@echo " > Importante: Es vital poner cada operador entre comillas simples (')"
+	@echo "		      para el funcionamiento adecuado del programa"
