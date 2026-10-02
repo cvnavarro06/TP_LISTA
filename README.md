@@ -108,50 +108,91 @@ Recordemos que cada conjunto esta almacenado en una `cola`, aprovecharemos su ca
 
 ## Flujo del `main.c`
 
+DIA
+
+GRA
+
+MA
+
+---
+
+## Funciones de [`main.c`](main.c)
+
+### parsear_conjunto()
+Esta función se encargará de ir parseando todos los números del conjunto e ir guardandolos en una estructura de datos `cola`.<br>
+La forma en que la función guarda los numeros es en base a separar cada número, tomando como separador (`,`), cuando cada número es separado se almacenará en cada contenedor/nodo de `cola`.
+
+#### Complejidad
+**O(n)**: La función tiene un proceso recursivo, el cuál esta demostrado que agrega una complejidad O(n), por otro lado la forma en que se lee cada número separado 
+
+### calculadora_de_conjuntos()
+Esta función se encargará de ir sumando los números correspondientes siguiendo la lógica explicada [**aquí**](#calculo-de-conjuntos).
+
+
+### rellenar_espacios()
+Esta función se encargará de rellenar los espacios donde la `calculadora_de_conjuntos()` ha dejado vacios, para más información de click [**aquí**](#calculo-de-conjuntos) 
+
+#### Complejidad
+**O(n)**: Al tener que utilizar un iterador que recorrerá `n` veces se determina dicha complejidad. Como adicional agrego al analisis que la complejidad de la función `sprintf()` es despreciable ya que recorrerá un máximo de 2 veces por iteración volviendolo despreciable al saber la cantidad de veces (`m`).
+
 
 # Funciones de `lista.c`
 
 ## Desiciones de diseño de lista.c
 
+### Estructura de `lista`
+```
+struct lista
+{
+  struct nodo* cabeza;
+  struct nodo* final;
+  size_t cantidad;
+};
+```
+
+Para implementar una estructura de `lista` utilice una forma de almacenar datos a base de `nodos`, el mismo `struct lista` tendrá acceso a una cabeza de lista y a un final de la misma, esto nos permitirá tener más control de flujo a la hora de querer hacer operaciones en la misma.
+
+Como adicional he agregado un campo de `cantidad` el cual representa la cantidad de elementos que se encuentrar en la estructura de datos.
 
 ### Diagrama de memoria
 
-Respondo la pregunta 1
+
+### Implementación de la estructura
+Para armar la estructura de `lista` se opto por elegir el tipo de **lista simplemente enlazada**.
 
 
-### Estructura de `lista`
 
 ---
 
-## lista_crear()
+### lista_crear()
 Crea una lista y la devuelve
 
 #### Complejidad
 
 **O(1)**: La función reserva un bloque de memoria para la estructura principal (`struct lista`) usando `malloc` e inicializa sus campos (`cantidad, cabeza, final`).
 
-## lista_cantidad()
+### lista_cantidad()
 Devuelve la cantidad de elementos que almacena el `struct lista`.
 
 #### Complejidad
 
 **O(1)**: Accede de manera directa al campo `cantidad` almacenado previamente en la estructura de la lista y se retorna.
 
-## lista_esta_vacia()
+### lista_esta_vacia()
 Devuelve **true** si la lista esta vacía
 
 #### Complejidad
 
 **O(1)**: Accede al campo `cantidad` y evalúa si es menor o igual a **0**, retornando el valor booleano resultante.
 
-## lista_insertar()
+### lista_insertar()
 Inserta un dato en la posición dada de la lista y devuelve **true** si pudo lograrlo. Si la `posición` está mas allá del final de la lista, no se puede insertar y devuelve **false**.
 
 #### Complejidad
 
 **O(n)**: Previamente a recorrer la lista para insertar, en caso de querer insertar al principio y exactamente al final de la lista, esta operación tiene una complejidad de tiempo constante **O(1)** verificando las cabeceras, en el peor de los casos (insertar en una `posición` del medio).
 
-## lista_eliminar()
+### lista_eliminar()
 Elimina un dato en la `posición` dada de la `lista` y devuelve el elemento eliminado. En caso de que la posición esté mas allá del final de la `lista`, no se va a poder eliminar el elemento y devolverá **NULL**.
 
 #### Complejidad
@@ -159,42 +200,42 @@ Elimina un dato en la `posición` dada de la `lista` y devuelve el elemento elim
 **O(n)**: Se iterará linealmente utilizando un bucle while sobre los nodos de la estructura desde la cabeza hasta dar con el nodo ubicado en la posición objetivo, desenlazándolo y liberando su memoria.
 En el mejor de los casos será **O(1)** si se desea eliminar los elementos de las cabeceras (`inicio, final`)
 
-## lista_remplazar()
+### lista_remplazar()
 Reemplaza un dato en la posición dada de la lista y lo devuelve.
 
 #### Complejidad
 
 **O(n)**: Se iterará un bucle while para avanzar nodo a nodo hasta coincidir con la `posición` solicitada y sobreescribir el valor de  `data`.
 
-## lista_obtener()
+### lista_obtener()
 Devuelve el elemento que se encuentra en la posición solicitada de la `lista`.
 
 #### Complejidad
 
 **O(n)**: Se realiza un bucle while desde el inicio para poder devolver la información almacenada en ese nodo específico.
 
-## lista_buscar()
+### lista_buscar()
 Busca un elemento en la `lista` utilizando una función de comparación (comparador), en caso de encontrarlo devolverá la `posición` en la que se encuentra pero si no lo encuentra devuelve **-1**. Si se provee el puntero encontrado se almacenará allí el `elemento` encontrado o **NULL** en caso de no hallarse, siempre y cuando sea distinto de **NULL**.
 
 #### Complejidad
 
 **O(n)**: Se realiza una iteración lineal evaluando nodo por nodo invocando a la función comparador(buscado, actual->data). En el peor de los casos (el elemento está al final o no existe), recorrerá la lista entera.
 
-## lista_iterar()
+### lista_iterar()
 Recorre la lista aplicando la función `f` sobre los elementos y devuelve la `cantidad` total de veces que fue invocada dicha función. Si la función `f` devuevle false, se deja de iterar.
 
 #### Complejidad
 
 **O(n)**: Itera la lista evaluando de forma continua `!f(actual->data, extra)` en un bucle while hasta que se acaben los nodos o se altere la bandera **stop**.
 
-## lista_destruir()
+### lista_destruir()
 Libera la lista y toda la memoria asociada
 
 #### Complejidad
 
 **O(n)**: Se implementa un diseño recursivo para la estructura de la función. Va a ir liberando nodo por nodo repetidas veces hasta llegar al final para liberar finalmente el contenedor principal (`lista`).
 
-## lista_destruir_todo()
+### lista_destruir_todo()
 Libera la `lista` y toda la memoria de los nodos asociados, aplicandole una función destructora enviada por parámetro para liberar el dato almacenado en la `lista`, el cual contendrá memoria reservada dinámicamente.
 
 #### Complejidad
@@ -205,37 +246,39 @@ Libera la `lista` y toda la memoria de los nodos asociados, aplicandole una func
 
 ## Iterador de la lista
 
-Respondo la pregunta del iterador (4)
+Antes de avanzar con esta sección del TDA [`lista.c`](src/lista.c), se debe de hacer 
 
-## lista_iterador_crear()
+---
+
+### lista_iterador_crear()
 Crea un iterador de lista y lo devuelve.
 
 #### Complejidad
 
 **O(1)**: Solo se reservará un bloque de memoria.
 
-## lista_iterador_se_puede_iterar()
+### lista_iterador_se_puede_iterar()
 Devuelve **true** si hay mas elementos para iterar.
 
 #### Complejidad
 
 **O(1)**: Evalua si el elemento en donde se encuentra es distinto de **NULL** por lo que solamente hace una verificación
 
-## lista_iterador_siguiente()
+### lista_iterador_siguiente()
 Avanzará al siguiente nodo de la lista que contiene el iterador
 
 #### Complejidad
 
 **O(1)**: Solamente hará una operación de desplazarse al siguiente nodo de la `lista` del iterador.  
 
-## lista_iterador_obtener_elemento()
+### lista_iterador_obtener_elemento()
 Devuelve el `dato` almacenado en el elemento actual de la `lista` que contiene el iterador.
 
 #### Complejidad
 
 **O(1)**: Solamente accederá al elemento del nodo actual, por ende se basa en una sola operación. 
 
-## lista_iterador_destruir()
+### lista_iterador_destruir()
 Se encargará de destruir `iterador` y su memoria perteneciente.
 
 #### Complejidad
@@ -245,8 +288,123 @@ Se encargará de destruir `iterador` y su memoria perteneciente.
 ---
 <br>
 
-## Funciones de pila.c
+# Funciones de pila.c
 
-## Funciones de cola.c
+## Desiciones de diseño
+
+### Estructura de `pila`
+```
+struct pila
+{
+  lista_t *lista;
+};
+```
+Para armar la estructura de pila, opté por utilizar el struct de lista, pero **¿Por qué?**
+
+Al tener una estrctura de `lista` como contenedor, puedo optar por resolver las funciones primitivas de `pila` con funciones primitivas de `lista`, como resultado obtendremos que el responsable de que las estructuras de datos funcionen correctamente es `lista`.
+
+La única responsabilidad de la estructura de pila es en como hace el flujo de información, recordemos que esta estructura sigue el principio de (**LIFO**)
+
+---
+
+### pila_crear()
+Crea una `pila` y lo devuelve.
+
+#### Complejidad
+**O(1)**: Crea una pila en base a la función [`lista_crear()`](#lista_crear).
+
+### pila_apilar()
+Agrega un elemento en el tope de la `pila` y devuelve un valor booleano.
+
+#### Complejidad
+**O(1)**: Invoca a `lista_insertar()`. Insertar en la posición 0 de la lista enlazada solo requiere actualizar el puntero a la cabeza (lista->cabeza) e incrementar el contador, operando en tiempo constante.
+
+### pila_desapilar()
+Remueve el elemento ubicado en el tope de la pila y devuelve su valor.
+
+#### Complejidad
+**O(1)**: Llama a `lista_eliminar()` y elimina la cabeza de la lista lo cual implica desvincular el primer nodo y liberar su bloque en O(1) sin necesidad de realizar ninguna iteración.
+
+### pila_tope()
+Devuelve el elemento que se encuentra en el tope de la `pila`
+
+#### Complejidad
+**O(1)**: Utiliza `lista_obtener()` y accede al elemento inicial se resuelve inmediatamente leyendo el atributo de datos en la cabeza de la lista.
+
+### pila_esta_vacia()
+Devuelve **true** si la lista se encuentra vacía.
+
+#### Complejidad
+**O(1)**: Utiliza la función `lista_esta_vacia()`, la cual evalúa directamente el atributo cantidad en tiempo constante.
+
+### pila_cantidad()
+Devuelve la cantidad total de elementos actuales almacenados.
+
+#### Complejidad
+**O(1)**: Utiliza la función `lista_cantidad()` para retornar directamente el valor del contador almacenado en la estructura interna.
+
+### pila_destruir()
+Libera la memoria de la estructura.
+
+#### Complejidad
+**O(n)**: Utilza la función **lista_destruir()** en donde se recorre de manera iterativa cada nodo siendo de tiempo `n`.
+
+# Funciones de cola.c
+
+## Desiciones de diseño
+
+### Estructura de `cola`
+
+```
+struct cola
+{
+  lista_t *lista;
+};
+```
+Al igual que la estructura de `pila`, opté por delegar todas las operaciones a las primitivas de `lista`. La única diferencia sería en como se comporta el flujo de información, ya que la cola sigue el principio de (**FIFO**).
+
+---
+
+### cola_crear()
+Crea una `cola` y la devuelve
+
+#### Complejidad
+**O(1)**: Para crear la estructura se llama a la función `lista_crear()` la cual tiene un tiempo de ejecución constante.
+
+### cola_encolar()
+Agrega un elemento al final de la cola y devuelve true si la operación tuvo éxito.
+
+#### Complejidad
+**O(1)**: Para encolar,la función llama a `lista_insertar()` y le indicamos que queremos insertar exactamente en la última posición, la propia función accedera de forma directa a través de su puntero `lista->final`, lo que evita iterar los nodos y convierte a esta operación en tiempo constante
+
+### cola_desencolar()
+Eliminará el elemento que se encuentra al frente, o sea el primero, de la `cola`
+
+#### Complejidad
+**O(1)**: Utiliza `lista_eliminar()` para remover el elemento, en donde se eliminará en la posición cero.
+
+### cola_frente()
+Devuelve el elemento que se encuentra al frente de la `cola` pero sin removerlo de la misma estructura.
+
+#### Complejidad
+**O(1)**: Se llama a la función `lista_obtener()` y se accede al primer elemento de la lista. Dicha operación es inmediata ya que solo lee el dato que se encuentra en la cabeza.
+
+### cola_esta vacía()
+Devuelve un valor booleano indicando si la estructura se encuentra vacía o no.
+
+#### Complejidad
+**O(1)**: Se llama a la función `lista_esta_vacia()` para verificar si la estructura de datos está vacía. La misma operación tiene una complejidad computacional constante.
+
+### cola_cantidad()
+Devuelve la cantidad de elementos que hay almacenados en la estructura.
+
+#### Complejidad
+**O(1)**: Se delega dicha operación a la función `lista_cantidad()`, dicha operación es inmediata.
+
+### cola_destruir()
+Libera toda la memoria asociada a la estructura de datos.
+
+#### Complejidad
+**O(n)**: Se llama a la función `lista_destruir()` para destruir cada nodo/contenedor asociado a la estructura. Dicha operación tiene una complejidad lineal. 
 
 # Decisiones de diseño
