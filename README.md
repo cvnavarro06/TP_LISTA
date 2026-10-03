@@ -106,13 +106,12 @@ Recordemos que cada conjunto esta almacenado en una `cola`, aprovecharemos su ca
   La respuesta es que no, se tienen que calcular los que estan en la misma posición en distintos conjuntos.
 
 
-## Flujo del `main.c`
+## Flujo del [`main.c`](main.c)
 
-DIA
+<p align="center">
+    <img src="img/diagrama_de_flujo_de_main.c.png" alt="Diagrama_de_flujo_de_mainc.c" width="620" height="300">
+</p>
 
-GRA
-
-MA
 
 ---
 
@@ -123,20 +122,22 @@ Esta función se encargará de ir parseando todos los números del conjunto e ir
 La forma en que la función guarda los numeros es en base a separar cada número, tomando como separador (`,`), cuando cada número es separado se almacenará en cada contenedor/nodo de `cola`.
 
 #### Complejidad
-**O(n)**: La función tiene un proceso recursivo, el cuál esta demostrado que agrega una complejidad O(n), por otro lado la forma en que se lee cada número separado 
+**O(n²)**: La función tiene un proceso recursivo, en donde se recorre hasta una tamaño n, por otro lado tenemos la función de `realloc()` que en el peor de los casos, si no hay memoria contígua, es **O(n)**. Y como último estará la función `atoi()` la cuál tiene un proceso secuencial pero límitado a el valor que representa un cada int, o sea 10 u 11 bits, por ende tiene un tamaño constante, volviendolo **O(1)**. 
 
 ### calculadora_de_conjuntos()
 Esta función se encargará de ir sumando los números correspondientes siguiendo la lógica explicada [**aquí**](#calculo-de-conjuntos).
 
+#### Complejidad
+**O(n²)**: Esta función en primera instancia recorre una cantidad $tope$ veces, luego por dentro contiene un while el cuál tiene un tamaño distinto por ende solo hace una suma al valor actual de complejidad, por otro lado hay un `realloc()` en donde en el peor de los casos será **O(n)**.
 
-### rellenar_espacios()
+### rellenar_espacios_vacios()
 Esta función se encargará de rellenar los espacios donde la `calculadora_de_conjuntos()` ha dejado vacios, para más información de click [**aquí**](#calculo-de-conjuntos) 
 
 #### Complejidad
-**O(n)**: Al tener que utilizar un iterador que recorrerá `n` veces se determina dicha complejidad. Como adicional agrego al analisis que la complejidad de la función `sprintf()` es despreciable ya que recorrerá un máximo de 2 veces por iteración volviendolo despreciable al saber la cantidad de veces (`m`).
+**O(n)**: Al tener que utilizar un iterador que recorrerá `n` veces se determina dicha complejidad. Como adicional agrego al analisis que la complejidad de la función `sprintf()` es despreciable ya que recorrerá un máximo de 2 veces por iteración volviendolo una operación constante al saber la cantidad de veces (`m`).
 
 
-# Funciones de `lista.c`
+# Funciones de [`lista.c`](src/lista.c)
 
 ## Desiciones de diseño de lista.c
 
@@ -155,7 +156,9 @@ Para implementar una estructura de `lista` utilice una forma de almacenar datos 
 Como adicional he agregado un campo de `cantidad` el cual representa la cantidad de elementos que se encuentrar en la estructura de datos.
 
 ### Diagrama de memoria
-
+<p align="center">
+    <img src="img/diagrama_de_memoria_lista.png" alt="Diagrama_lista" width="400" height="200">
+</p>
 
 ### Implementación de la estructura
 Para armar la estructura de `lista` se opto por elegir el tipo de **lista simplemente enlazada**. **¿Cuál es su particularidad?**
@@ -364,7 +367,7 @@ Se encargará de destruir `iterador` y su memoria perteneciente.
 ---
 <br>
 
-# Funciones de pila.c
+# Funciones de [`pila.c`](src/pila.c)
 
 ## Desiciones de diseño
 
@@ -425,7 +428,7 @@ Libera la memoria de la estructura.
 #### Complejidad
 **O(n)**: Utilza la función **lista_destruir()** en donde se recorre de manera iterativa cada nodo siendo de tiempo `n`.
 
-# Funciones de cola.c
+# Funciones de [`cola.c`](src/cola.c  )
 
 ## Desiciones de diseño
 
@@ -519,8 +522,23 @@ Para comprender mejor esta estructura, se presentará un ejemplo. <br> Supongamo
 
 Siguiendo el esquema anteriormente brindado, para saber como es el flujo de datos, se considera que por la posición izquierda es donde se ingresarán nuevos datos y los el dato a remover se encontrará en el frente, o sea en el extremo derecho.
 
->Consideración: El flujo de información va a variar dependiendo de la implementación por la cual el desarrollador opte.
+>Consideración: El flujo de información va a variar dependiendo de la implementación de cierto desarrollador.
 
 
 
 # Decisiones de diseño
+
+### Desiciones en **main.c**
+Respecto al main.c, para resolver lo pedido en el enunciado, se me ocurrio almacenar los conjuntos de la siguiente manera:
+
+Primero los almacenaría en una `cola` **¿A qué se debe dicha decisión?** Se debe a que debía de aprovechar el principio que sigue la misma estructura (**FIFO**), para más información de click [**aquí**](#estructura-de-cola-1).
+
+Gracias a la función de la estructura `cola` podría hacer operaciones aritméticas de todos los conjuntos de manera ordenada, o sea que las operaciones se realizan respecto a las posiciones de los números, para verlo más a detalle de click [**aquí**](#2-funcionamiento-del-programa).
+
+La función que cumple el almacenamiento de las `colas` en la estructura `lista` es que funcionaría como un contenedor de **conjuntos**, ya que al realizar un desencolamiento de cada `cola`, la misma seguirá almacenada en la lista hasta que se finalice la operación de [**_calculadora_de_conjuntos()_**](#calculadora_de_conjuntos).
+
+Respecto al relleno de espacios vacios del conjunto, para saber cuantos debería de calcular opte por primero, después de almacenar un conjunto en una `cola`, calcular cuál sería la cola más larga y la más corta, esto se realizará para determinar hasta que longitud realizar operaciones aritméticas (longitud mínima) y hasta donde debería de rellenar (longitud máxima) siempre y cuando sea necesario. Cuando ya se hayan realizado las operaciones necesarias y hayan espacios vacios, para saber cuantos espacios hay que rellenar simplemente se debera de realizar esta resta: $espacios vacios = max - min$.
+
+### Desiciones en **lista.c**
+Para seguir con el enunciado impuesto, una de sus pautas era que las estructuras pila y cola reutilicen la implementación de `lista`, por ende para cumplir con la complejidad en las operaciones de insertar y eliminar, previamente a recorrer una lista se debía de analizar las posiciones exactas donde las otras estructuras realizan sus operaciones, esto hará que las mismas tengan un costo constante.<br>
+Vease [`pila`](#funciones-de-pilac) y [`cola`](#funciones-de-colac). 
