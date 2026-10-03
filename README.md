@@ -158,9 +158,60 @@ Como adicional he agregado un campo de `cantidad` el cual representa la cantidad
 
 
 ### Implementación de la estructura
-Para armar la estructura de `lista` se opto por elegir el tipo de **lista simplemente enlazada**.
+Para armar la estructura de `lista` se opto por elegir el tipo de **lista simplemente enlazada**. **¿Cuál es su particularidad?**
 
+Este tipo de lista es esencial cuando queremos almacenar datos de manera dinámica y que no sean contíguos en la memoria, la forma en que se conecta cada elemento de la lista es con una estructura de nodos.
 
+#### Visualización
+```
+------
+|    |    -----    -----
+| H  |--> | n | -->| n |
+|____|    -----    -----
+```
+La ventaja de este tipo de lista es que su redimensión en memoria es nula ya que solo es necesario reservar memoria una única vez por nodo.
+
+Veamos que otros tipos de lista existen.
+
+### Lista
+Para armar la estructura de `lista` se puede optar por un vector dinámico.
+
+Este tipo de lista es esencial cuando queremos almacenar datos de manera secuencial y de manera contigua en la memoria. A diferencia de la implementada en este programa, esta se basa en un único bloque de memoria que aloja todos los elementos uno al lado del otro y no en una estructura de nodos.
+
+#### Visualización
+```
+ -----------------------
+| 0  | 1  | 2  | 3  | 4 |
+ -----------------------
+```
+La ventaja de este tipo de lista es que permite un acceso directo y aleatorio a cualquier elemento mediante su índice en tiempo constante **O(1)**. Por otro lado su desventaja es que insertar o eliminar elementos en el medio obliga a desplazar gran parte de los elementos, y cuando se agota el espacio de la estructura, esta misma requiere una costosa redimensión en memoria con `realloc()`.
+
+### Lista doblemente enlazada
+Al igual que la **lista simplemente enlazada**, este tipo almacena datos de manera dinámica y no contigua en la memoria. Sin embargo su estructura de nodos es más afinada ya que cada elemento posee dos enlaces simultáneos, uno apuntando al nodo siguiente y otro al nodo anterior.
+
+#### Visualización
+```
+------
+|    |    -------      -------
+| H  |--> |  n  | <--> |  n  |
+|____|    -------      -------
+```
+Pero a diferencia de la lista simplemente enlazada, **¿Cuál es su ventaja?**
+
+La ventaja de este tipo de lista es que permite una "navegación" en doble sentido lo cual la hace muy eficiente ya que al eliminar un nodo conocido se resuelve en O(1) sin necesidad de recorrer la lista desde el principio.
+
+### Lista circular
+
+Este tipo de `lista` tiene su diferencial frente a las listas anteriormente mencionadas, esto se debe a que el último nodo de la estructura no apunta a un valor nulo (**NULL**), sino que su enlace se "linkea" directamente con la cabeza de la lista, cerrando un anillo continuo.
+
+```
+---------------------------------
+v                               |
+------    -----      -----    -----
+| H  |--> | n | -->  | n | -->| n |
+|____|    -----      -----    -----
+```
+La ventaja más visible para este tipo de estructura es cuando queremos implementar una acción de característica infinita, como por ejemplo que cada nodo represente una canción en una playlist previamente armada, cuando termina la última canción se accederá a la primera en la lista.
 
 ---
 
@@ -248,7 +299,23 @@ Libera la `lista` y toda la memoria de los nodos asociados, aplicandole una func
 
 ¿A que nos referimos con **Iterador de la lista**?
 
-Cuando hablamos de un iterador de la estructura de datos $lista$, hablamos de un TDA **externo** el cuál proveé entre sus cualidades, una lista breve de funciones capaces de poder controlar un recorrido/iteración de lista mucho más flexible. Cuando nos referimos a controlar la iteración de la $lista$
+Cuando hablamos de un iterador de la estructura de datos lista, hablamos de un TDA **externo** el cuál proveé entre sus cualidades, una lista breve de funciones capaces de poder controlar un recorrido/iteración de lista mucho más flexible. Cuando nos referimos a controlar la iteración de la lista, hablamos de que podemos recorrer la misma en cualquier momento del programa, dandole al usuario el poder de manejar el ritmo de recorrido de la lista.
+
+### Estructura de `lista_iterador_t`
+```
+struct lista_iterador
+{
+  struct nodo *actual;
+};
+```
+Esta estructura permite que el iterador acceda a los nodos de la lista que se le proporcione, más abajo se visualizará que funcionalidad brinda al usuario.
+
+
+Por otro lado tenemos un iterador **interno**, el cuál se puede ver dandole click [$aquí$](#lista_iterar). <br>
+Dicho iterador pertenece al propio **TDA**, se ve reprensetado en `lista_iterar()` en donde hay un gran beneficio el cual pierde el usuario, dicho beneficio es el control de la iteración de la lista. Por otro lado, si bien el usuario pierde dicho beneficio, adquiere uno más amigable para nuevos desarrolladores, dicho beneficio es el encapsulamiento total, a diferencia de la estructura del iterador de la lista, ahora el usuario no se debe de preocupar sobre manejo de memoria, saber sobre nodos y no requiere de necesitar una nueva estructura de datos.
+
+
+
 
 ---
 
@@ -408,5 +475,45 @@ Libera toda la memoria asociada a la estructura de datos.
 
 #### Complejidad
 **O(n)**: Se llama a la función `lista_destruir()` para destruir cada nodo/contenedor asociado a la estructura. Dicha operación tiene una complejidad lineal. 
+
+---
+
+## Diferencias entre pila y cola
+
+Como se vio anteriormente, están las estructuras de datos **pila** y **cola** aun que ¿Cuáles son sus verdaderas diferencias?
+
+### Estructura de pila
+
+```
+|8|  ---> Tope (Último elemento)
+|4|
+|6| 
+|2|  ---> Primero elemento
+ -
+```
+Aquí tenemos una representación de como se podría visualizar una estrucutra de datos `pila`.
+
+Para comprender esta estructura podemos utilizar la analogía de una pila de platos, nosotros cuando vamos _apilando_ platos, vamos insertando uno arriba del otro, hasta cierto tope, dicho tope será el último plato insertado en nuestra pila, haciendo que el primer plato insertado quede en el fondo de la misma, por ende para poder sacar un plato deberás de sacar el que se encuentra en el tope, o sea el último plato introducido.
+
+Una analogía más orientada al área de la informática es el famoso **ctrl + z**, dicha operación sigue una lógica de pila, o sea un principio **LIFO** (Last in, first out) o en otras palabras el último en entrar es el primero en salir.
+
+### Estructura de cola
+```
+
+Último       Primero
+ |              |
+_________________
+|1 4 6 8 12 67 3| --> Frente
+-----------------
+```
+Por otro lado tenemos a la estructura de datos `cola` la cuál su diferencia es la lógica/principio que sigue, el mismo es **FIFO** (First in, first out) en otras palabras el primero que entra es el primero que sale.
+
+Para comprender mejor esta estructura, se presentará un ejemplo. <br> Supongamos que hay una cola en un supermercado en donde con el tiempo va sumandose gente a la misma (**datos**), como es comunmente en una cola, el primero en llegar es el primero en ser atendido y los nuevos clientes deberán esperar hasta llegar al **frente** de la cola.
+
+Siguiendo el esquema anteriormente brindado, para saber como es el flujo de datos, se considera que por la posición izquierda es donde se ingresarán nuevos datos y los el dato a remover se encontrará en el frente, o sea en el extremo derecho.
+
+>Consideración: El flujo de información va a variar dependiendo de la implementación por la cual el desarrollador opte.
+
+
 
 # Decisiones de diseño
