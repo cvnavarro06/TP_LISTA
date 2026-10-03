@@ -198,6 +198,16 @@ Al igual que la **lista simplemente enlazada**, este tipo almacena datos de mane
 ```
 Pero a diferencia de la lista simplemente enlazada, **¿Cuál es su ventaja?**
 
+### Estructura de los nodos de la lista doblemente enlazada
+```
+struct nodo
+{
+  void *data;
+  struct nodo *siguiente;
+  struct nodo *anterior;
+};
+```
+
 La ventaja de este tipo de lista es que permite una "navegación" en doble sentido lo cual la hace muy eficiente ya que al eliminar un nodo conocido se resuelve en O(1) sin necesidad de recorrer la lista desde el principio.
 
 ### Lista circular
@@ -314,9 +324,6 @@ Esta estructura permite que el iterador acceda a los nodos de la lista que se le
 Por otro lado tenemos un iterador **interno**, el cuál se puede ver dandole click [$aquí$](#lista_iterar). <br>
 Dicho iterador pertenece al propio **TDA**, se ve reprensetado en `lista_iterar()` en donde hay un gran beneficio el cual pierde el usuario, dicho beneficio es el control de la iteración de la lista. Por otro lado, si bien el usuario pierde dicho beneficio, adquiere uno más amigable para nuevos desarrolladores, dicho beneficio es el encapsulamiento total, a diferencia de la estructura del iterador de la lista, ahora el usuario no se debe de preocupar sobre manejo de memoria, saber sobre nodos y no requiere de necesitar una nueva estructura de datos.
 
-
-
-
 ---
 
 ### lista_iterador_crear()
@@ -380,7 +387,7 @@ La única responsabilidad de la estructura de pila es en como hace el flujo de i
 Crea una `pila` y lo devuelve.
 
 #### Complejidad
-**O(1)**: Crea una pila en base a la función [`lista_crear()`](#lista_crear).
+**O(1)**: Crea una pila en base a la función `lista_crear()`.
 
 ### pila_apilar()
 Agrega un elemento en el tope de la `pila` y devuelve un valor booleano.
@@ -502,7 +509,7 @@ Una analogía más orientada al área de la informática es el famoso **ctrl + z
 
 Último       Primero
  |              |
-_________________
+-----------------
 |1 4 6 8 12 67 3| --> Frente
 -----------------
 ```
