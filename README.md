@@ -246,7 +246,9 @@ Libera la `lista` y toda la memoria de los nodos asociados, aplicandole una func
 
 ## Iterador de la lista
 
-Antes de avanzar con esta sección del TDA [`lista.c`](src/lista.c), se debe de hacer 
+¿A que nos referimos con **Iterador de la lista**?
+
+Cuando hablamos de un iterador de la estructura de datos $lista$, hablamos de un TDA **externo** el cuál proveé entre sus cualidades, una lista breve de funciones capaces de poder controlar un recorrido/iteración de lista mucho más flexible. Cuando nos referimos a controlar la iteración de la $lista$
 
 ---
 
